@@ -53,6 +53,12 @@ var server = http.createServer(function(req, res) {
             res.write(data);
             res.end();
         });
+    } else if(req.url === '/static/SH_G.jpg') {
+        fs.readFileSync('./static/SH_G.jpg', 'binary', function(err, data) {
+            res.writeHead(200, {'Content-Type' : 'image/jpg; charset=utf-8'});
+            res.write(data);
+            res.end();
+        });
     } else if(req.url === '/server') {
         // サーバ処理
 
