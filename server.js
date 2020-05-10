@@ -117,8 +117,9 @@ var server = http.createServer(function(req, res) {
                             fs.readFile('./roomMaster.html', 'utf-8', function(err, data) {
                                 res.writeHead(200, {'Content-Type' : 'text/html;charset=utf-8'});
                                 dataFix = data.replace('replaceId', idfix);
-                                dataFix2 = dataFix.replace('replaceLi', '<li id="myname" class="panel panel-default">' + namefix + '</li>');
-                                res.write(dataFix2);
+                                dataFix2 = dataFix.replace('replaceId', idfix);
+                                dataFix3 = dataFix2.replace('replaceLi', '<li id="myname" class="panel panel-default">' + namefix + '</li>');
+                                res.write(dataFix3);
                                 res.end();
                             });
                         }
@@ -169,8 +170,9 @@ var server = http.createServer(function(req, res) {
                             fs.readFile('./roomSlave.html', 'utf-8', function(err, data) {
                                 res.writeHead(200, {'Content-Type' : 'text/html'});
                                 dataFix = data.replace('replaceId', id);
-                                dataFix2 = dataFix.replace('replaceLi', '<li id="myname" class="panel panel-default">' + namefix + '</li>');
-                                res.write(dataFix2);
+                                dataFix2 = dataFix.replace('replaceId', id);
+                                dataFix3 = dataFix2.replace('replaceLi', '<li id="myname" class="panel panel-default">' + namefix + '</li>');
+                                res.write(dataFix3);
                                 res.end();
                             });
                         }
