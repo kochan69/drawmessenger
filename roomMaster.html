@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-165988646-1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-165988646-1');
+    </script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <style>
+       .breadcrumb > li + li:before {
+          content: ">";
+        } 
+        .playing { background-color: #ffff66; }
+    </style>
+    <style>
+        html { min-height: 100%; position: relative; overflow: hidden;}
+        #main { margin-bottom: 70px;}
+        div #roomid { display: inline !important; }
+        .checkon { background-color: #007bff; border-color: #007bff; color: #FFF }
+        .checkoff { background-color: #495057; border-color: #495057; color: #FFF }
+    </style>
+    <title>お絵かき伝言ゲーム for オンライン</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #42aaf5;">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="http://drawmessenger.com/" id="index">お絵かき伝言ゲーム for オンライン</a>
+            </div>
+        </div>
+    </nav>
+    <div id="main" class="container">
+        <div id="prepare">
+            <h2>ルーム：<div id="roomid" style="display: inline !important;">replaceId</div></h2>
+            <button id="automode" class="btn checkbtn checkoff">お題を自動決定する</button>  <button id="btn" class="btn btn-success">メンバー確定</button>
+            <h5>参加者</h5>
+            <ul id="member">
+                replaceLi
+            </ul>
+            <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-text="お絵かき伝言ゲームをしよう！ルームID：replaceId" data-url="http://drawmessenger.com/join" data-hashtags="お絵かき伝言ゲーム" data-lang="ja" data-show-count="false">Tweet</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+            <div class="line-it-button" data-lang="ja" data-type="share-b" data-ver="3" data-url="http://drawmessenger.com" data-color="default" data-size="small" data-count="false" style="display: none;"></div>
+            <script src="https://d.line-scdn.net/r/web/social-plugin/js/thirdparty/loader.min.js" async="async" defer="defer"></script>
+        </div>
+        <div id="header" style="display: none;">
+            <h1>ルーム：<div id="playroomid"></div></h1>
+            <h3><div id="player"></div></h3>
+        </div>
+        <div id="Content">
+            <div id="seq" style="display: none;">
+                <p>【お絵かき順】</p>
+                <ol id="seqList" class="breadcrumb">
+                </ol>
+            </div>
+            <div id="wait_area" style="display: none;">
+                    <p>お待ちください・・・</p>
+            </div>
+            <div id="title" style="display: none;">
+                <div class="form-group">
+                    <label id="titledisp">お題を決めてください（１０文字まで）</label>
+                    <textarea id="titleText" rows="1" cols="20" maxlength="10" class="form-control"></textarea>
+                    <br>
+                    <button id="titleok" class="btn btn-success">このお題で絵を描く</button>
+                </div>
+            </div>
+            <div id="preCanvas" style="display: none;">
+                <p>前の人の絵を確認してください。</p>
+                <img src="" id="preImage" />
+                <button id="play" class="btn btn-success">絵を描く</button>
+            </div>
+            <div id="canvas_area" style="display: none;">
+                下の枠に絵を描いてください。
+                <canvas
+                    id="draw-area"
+                    width="360px"
+                    height="380px"
+                    style="border: 3px solid #000000;"></canvas>
+                <button id="clear" class="btn btn-warning">全てクリア</button>
+                <button id="ok" class="btn btn-info">次の人へ</button>
+            </div>
+            <div id="answer" style="display: none;">
+                答えは：<textarea id="answerText" rows="1" cols="20" maxlength="10"></textarea>
+                <button id="ans" class="btn btn-success">回答を送信</button>
+            </div>
+        </div>
+        <div id="lastform" style="display: none;">
+            <p>しりとりが終わりました。結果を確認してみましょう！</p>
+            <form name="resultform" action="http://drawmessenger.com/server" method="POST">
+                <input type="hidden" name="type" value="result">
+                <input type="hidden" id="hiddenId" name="id" value="">
+                <input type="hidden" id="hiddenname" name="name" value="">
+                <input type="hidden" id="hiddenpos" name="pos" value="">
+                <button id="sendform" class="btn btn-danger">結果を確認</button>
+            </form>
+        </div>
+        <div id="result" style="display: none;">
+            <p id="resultSummary"></p>
+            <p id="inTitle"></p><p id="outAnswer"></p>
+            <ul id="images">
+            </ul>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <script src="./draw.js"></script>
+    <script>
+        console.log('start');
+        var io = io.connect('http://drawmessenger.com');
+        io.on('connect', function(socket) {
+            console.log('Connected');
+        });
+        var member = document.getElementById('member');
+        var roomid = document.getElementById('roomid').innerHTML;
+        document.getElementById('playroomid').textContent = roomid;
+        var myname = document.getElementById('myname').innerHTML;
+        document.getElementById('player').textContent = myname + " さん";
+        var pos = 'master';
+        var info_seq = '';
+        var info_members = [];
+        io.emit('join', {
+            id: roomid,
+            name: myname,
+            position: 'master'
+        }, function() {
+            console.log('emited');
+        });
+        io.on('joined', function(name) {
+            console.log('received');
+            var li = document.createElement('li');
+            li.textContent = name;
+            li.className = "panel panel-default";
+            member.appendChild(li);
+            var elements = document.getElementById('member').children;
+            var names = [roomid];
+            for (var i = 0; i < elements.length; i++) {
+                names.push(elements[i].innerHTML);
+            }
+            io.emit('bcast', names);
+        })
+        io.on('leaved', function(name) {
+            console.log('received');
+            var elements = document.getElementById('member').children;
+            var names = [roomid];
+            for (var i = 0; i < elements.length; i++) {
+                if(name != elements[i].innerHTML) {
+                    names.push(elements[i].innerHTML);
+                }
+            }
+            var nodes = document.getElementById('member');
+            for (var i = 0; i< nodes.childNodes.length; i++) {
+                if(nodes.childNodes[i].innerHTML === name) {
+                    nodes.removeChild(nodes.childNodes[i]);
+                }
+            }
+            io.emit('bcast', names);
+            alert(name + 'さんが退室しました。');
+        })
+        io.on('start_game', function(members) {
+            console.log('start_game: ' + members);
+            document.getElementById('prepare').style.display='none';
+            document.getElementById('seq').style.display='block';
+            document.getElementById('wait_area').style.display='block';
+            var seqList = document.getElementById('seqList');
+            for(var i = 0; i < members.length; i++) {
+                var li = document.createElement('li');
+                li.textContent = members[i];
+                if (i === 0) {
+                    li.className = 'playing';
+                }
+                seqList.appendChild(li);
+            }
+        })
+        io.on('next_game', function(info) {
+            console.log('next_game: ' + info);
+            var seqLists = document.getElementById('seqList').children;
+            info_seq = info.seq;
+            info_members = info.members;
+            for (var i = 0; i < seqLists.length; i++) {
+                if (info.seq === i) {
+                    seqLists[i].className = "playing";
+                } else {
+                    seqLists[i].className = "";
+                }
+            }
+            if (info.members[info.seq] === myname) {
+                document.getElementById('seq').style.display='none';
+                document.getElementById('wait_area').style.display='none';
+                if (info.seq === 0) {
+                    if (info.modetitle === '') {
+                        document.getElementById('title').style.display='block';
+                    } else {
+                        document.getElementById('title').style.display='block';
+                        document.getElementById('titledisp').textContent = 'お題';
+                        document.getElementById('titleText').value = info.modetitle;
+                        document.getElementById('titleText').readOnly = true;
+                    }
+                } else if (info.members.length === info.seq + 1) {
+                    document.getElementById('preCanvas').style.display='block';
+                    document.getElementById('preImage').src = info.image;
+                    document.getElementById('answer').style.display='block';
+                    document.getElementById('play').style.display='none';
+                }  else {
+                    document.getElementById('preCanvas').style.display='block';
+                    document.getElementById('preImage').src = info.image;
+                    document.getElementById('play').style.display='block';
+                }
+            } else {
+                document.getElementById('seq').style.display='block';
+                document.getElementById('wait_area').style.display='block';
+                document.getElementById('title').style.display='none';
+                document.getElementById('preCanvas').style.display='none';
+                document.getElementById('canvas_area').style.display='none';
+            }
+        })
+        io.on('result', function(info) {
+            document.getElementById('lastform').style.display='block';
+            document.getElementById('seq').style.display='none';
+            document.getElementById('wait_area').style.display='none';
+            document.getElementById('title').style.display='none';
+            document.getElementById('preCanvas').style.display='none';
+            document.getElementById('answer').style.display='none';
+        })
+    </script>
+    <script>
+        var btn = document.getElementById('btn');
+        btn.addEventListener('click', function() {
+            if (document.getElementById('member').childElementCount < 3) {
+                alert('人数が少なすぎます');
+                return;
+            } else if (document.getElementById('member').childElementCount > 9) {
+                alert('人数が多すぎます');
+                return;
+            }
+            var elements = document.getElementById('member').children;
+            var mode = 'manual';
+            if (document.getElementById('automode').classList.contains('checkon')) {
+                mode = 'auto'
+            }
+            var names = [roomid, mode];
+            for (var i = 0; i < elements.length; i++) {
+                names.push(elements[i].innerHTML);
+            }
+
+            console.log(names);
+            io.emit('start', names);
+        })
+    </script>
+    <script>
+        var ok = document.getElementById('ok');
+        ok.addEventListener('click', function(){
+            var canvas = document.getElementById('draw-area');
+            var dataURI = canvas.toDataURL('image/png');
+            console.log(dataURI);
+            var title = '';
+            if (info_seq === 0) {
+                title = document.getElementById('titleText').value;
+            }
+            info = {
+                'id': roomid,
+                'members': info_members,
+                'seq': info_seq,
+                'image': dataURI,
+                'title': title
+            }
+            io.emit('sendImage', info);
+        })
+        var ans = document.getElementById('ans');
+        ans.addEventListener('click', function() {
+            var reply = document.getElementById('answerText').value;
+            info = {
+                'id': roomid,
+                'members':info_members,
+                'seq': info_seq,
+                'image': '',
+                'title': reply
+            }
+            io.emit('answer', info);
+        })
+        var send = document.getElementById('sendform');
+        send.addEventListener('click', function() {
+            document.getElementById('hiddenId').value = roomid;
+            document.getElementById('hiddenname').value = myname;
+            document.getElementById('hiddenpos').value = pos;
+            document.resultform.submit();
+        })
+        var play = document.getElementById('play');
+        play.addEventListener('click', function() {
+            document.getElementById('preCanvas').style.display = 'none';
+            document.getElementById('seq').style.display = 'none';
+            document.getElementById('canvas_area').style.display = 'block';
+        })
+        var titleok = document.getElementById('titleok');
+        titleok.addEventListener('click', function() {
+            document.getElementById('title').style.display = 'none';
+            document.getElementById('seq').style.display = 'none';
+            document.getElementById('canvas_area').style.display = 'block';
+        })
+        var index = document.getElementById('index');
+        index.addEventListener('click', function(e) {
+            var confirmed = window.confirm('ルームから退室しますがよろしいですか？');
+            if (!confirmed) {
+                e.preventDefault();
+            } else {
+                info = {
+                'id': roomid,
+                'name': myname
+                }
+                io.emit('leave', info);   
+            }
+        }, false);
+    </script>
+    <script>
+        $('#automode').click(function() {
+            if ($('#automode').hasClass('checkoff')) {
+                $('#automode').removeClass('checkoff');
+                $('#automode').addClass('checkon');
+            } else {
+                $('#automode').removeClass('checkon');
+                $('#automode').addClass('checkoff');
+            }
+        })
+    </script>
+    <footer class="fixed-bottom navbar navbar-expand-sm" style="position: absolute; background-color: #42aaf5;">
+        <font color="#FFFFFF">Copyright © 2020 KosukeYamazaki All Right Reserved.</font>
+    </footer>
+</body>
+</html>
