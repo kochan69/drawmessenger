@@ -318,7 +318,7 @@
         }, false);
     </script>
     <script>
-        $('#automode').click(function() {
+        $(document).on('click', '#automode', function() {
             if ($('#automode').hasClass('checkoff')) {
                 $('#automode').removeClass('checkoff');
                 $('#automode').addClass('checkon');
