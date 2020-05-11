@@ -33,6 +33,13 @@ var server = http.createServer(function(req, res) {
             });
         var image = fs.readFileSync("./favicon.ico", "binary");
         res.end(image, "binary");
+    }
+    else if(req.url === '/apple-touch-icon.png') {
+        res.writeHead(200, {
+            'Content-Type': 'image/png; charset=utf-8'
+            });
+        var image = fs.readFileSync("./apple-touch-icon.png", "binary");
+        res.end(image, "binary");
     } else if(req.url === '/') {
         // index.html
         target = './index.html';
