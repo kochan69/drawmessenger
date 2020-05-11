@@ -413,7 +413,7 @@ async function start_game(id, mode, members) {
     info = {
         'id': id,
         'members': members,
-        'seq': '0',
+        'seq': 0,
         'modetitle': ''
     }
 
