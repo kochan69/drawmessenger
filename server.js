@@ -58,7 +58,19 @@ var server = http.createServer(function(req, res) {
         screen(target, res);
     } else if(req.url === '/draw.js') {
         fs.readFile('./draw.js', 'utf-8', function(err, data) {
-            res.writeHead(200, {'Content-Type' : 'text/plain'});
+            res.writeHead(200, {'Content-Type' : 'text/plain; charset=utf-8'});
+            res.write(data);
+            res.end();
+        });
+    } else if(req.url === '/robots.txt') {
+        fs.readFile('./robots.txt', 'utf-8', function(err, data) {
+            res.writeHead(200, {'Content-Type' : 'text/plain; charset=utf-8'});
+            res.write(data);
+            res.end();
+        });
+    } else if(req.url === '/sitemap.xml') {
+        fs.readFile('./sitemap.xml', 'utf-8', function(err, data) {
+            res.writeHead(200, {'Content-Type' : 'application/xml; charset=utf-8'});
             res.write(data);
             res.end();
         });
