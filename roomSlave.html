@@ -61,47 +61,59 @@
             </div>
             <div id="title" style="display: none;">
                 <div class="form-group">
-                    <label>お題を決めてください（１０文字まで）</label>
+                    <label id="titledisp">お題を決めてください（１０文字まで）</label>
                     <textarea id="titleText" rows="1" cols="20" maxlength="10" class="form-control"></textarea>
                     <br>
                     <button id="titleok" class="btn btn-success">このお題で絵を描く</button>
                 </div>
             </div>
-            <div id="preCanvas" style="display: none;">
-                前の人の絵を確認してください。
-                <img src="" id="preImage" />
-                <button id="play" class="btn btn-success" style="display: none;">絵を描く</button>
+            <div style="text-align: center;">
+                <div id="preCanvas" style="display: none;">
+                    前の人の絵を確認してください。<br>
+                    <img src="" id="preImage" />
+                    <button id="play" class="btn btn-success" style="display: none;">絵を描く</button>
+                </div>
             </div>
-            <div id="canvas_area" style="display: none;">
-                下の枠に絵を描いてください。
-                <canvas
-                    id="draw-area"
-                    width="360px"
-                    height="380px"
-                    style="border: 3px solid #000000;"></canvas>
-                <button id="clear" class="btn btn-warning">全てクリア</button>
-                <button id="ok" class="btn btn-info">次の人へ</button>
+            <div style="text-align: center;">
+                <div id="canvas_area" style="display: none;">
+                    下の枠に絵を描いてください。<br>
+                    <canvas
+                        id="draw-area"
+                        width="360px"
+                        height="380px"
+                        style="border: 3px solid #000000; max-width: 100%;">
+                    </canvas>
+                    <br>
+                    <button id="clear" class="btn btn-warning">全てクリア</button>
+                    <button id="ok" class="btn btn-info">次の人へ</button>
+                </div>
             </div>
-            <div id="answer" style="display: none;">
-                答え<textarea id="answerText" rows="1" cols="20" maxlength="10"></textarea>
-                <button id="ans" class="btn btn-success">送信</button>
+            <div style="text-align: center;">
+                <div id="answer" style="display: none;">
+                    答え<textarea id="answerText" rows="1" cols="20" maxlength="10"></textarea>
+                    <button id="ans" class="btn btn-success">送信</button>
+                </div>
             </div>
         </div>
-        <div id="lastform" style="display: none;">
-            <p>伝言ゲームが終わりました。結果を確認してみましょう！</p>
-            <form action="http://drawmessenger.com/server" method="POST">
-                <input type="hidden" name="type" value="result">
-                <input type="hidden" id="hiddenId" name="id" value="">
-                <input type="hidden" id="hiddenname" name="name" value="">
-                <input type="hidden" id="hiddenpos" name="pos" value="">
-                <button id="sendform" class="btn btn-danger">結果を確認</button>
-            </form>
+        <div style="text-align: center;">
+            <div id="lastform" style="display: none;">
+                <p>伝言ゲームが終わりました。結果を確認してみましょう！</p>
+                <form action="http://drawmessenger.com/server" method="POST">
+                    <input type="hidden" name="type" value="result">
+                    <input type="hidden" id="hiddenId" name="id" value="">
+                    <input type="hidden" id="hiddenname" name="name" value="">
+                    <input type="hidden" id="hiddenpos" name="pos" value="">
+                    <button id="sendform" class="btn btn-danger">結果を確認</button>
+                </form>
+            </div>
         </div>
-        <div id="result" style="display: none;">
-            <p id="resultSummary"></p>
-            <p id="inTitle"></p><p id="outAnswer"></p>
-            <ul id="images">
-            </ul>
+        <div style="text-align: center;">
+            <div id="result" style="display: none;">
+                <p id="resultSummary"></p>
+                <p id="inTitle"></p><p id="outAnswer"></p>
+                <ul id="images">
+                </ul>
+            </div>
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -158,7 +170,7 @@
             }
         })
         io.on('next_game', function(info) {
-            console.log('next_game: ' + info);
+            console.log('next_game: ' + info.modetitle);
             var seqLists = document.getElementById('seqList').children;
             info_seq = info.seq;
             info_members = info.members;
