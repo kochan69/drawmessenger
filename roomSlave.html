@@ -116,19 +116,33 @@
             </div>
         </div>
     </div>
+    <div id="status" style="display: none;"></div>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
     <script src="./draw.js"></script>
     <script>
+        var roomid = document.getElementById('roomid').innerHTML;
         console.log('start');
         var io = io.connect('http://drawmessenger.com');
         io.on('connect', function(socket) {
             console.log('Connected');
         });
+        io.on('disconnect', function(socket) {
+            console.log('disconnected');
+            var result = confirm('通信が切断されました。再度接続をしますか？');
+            if (result) {
+                var status = document.getElementById('status').innerHTML;
+                info = {
+                    id : roomid,
+                    status : status
+                }
+                console.log('checkStatus:' + info.status);
+                io.emit('checkStatus', info);
+            }
+        })
         var member = document.getElementById('member');
-        var roomid = document.getElementById('roomid').innerHTML;
         document.getElementById('playroomid').textContent = roomid;
         var myname = document.getElementById('myname').innerHTML;
         document.getElementById('player').textContent = myname + " さん";
@@ -144,6 +158,7 @@
         });
         io.on('bcasted', function(names) {
             console.log('received:' + names);
+            document.getElementById('status').innerHTML = 'bcast';
             while(member.firstChild) {
                 member.removeChild(member.firstChild);
             }
@@ -156,6 +171,7 @@
         })
         io.on('start_game', function(members) {
             console.log('start_game: ' + members);
+            document.getElementById('status').innerHTML = 'start';
             document.getElementById('prepare').style.display='none';
             document.getElementById('seq').style.display='block';
             document.getElementById('wait_area').style.display='block';
@@ -171,6 +187,7 @@
         })
         io.on('next_game', function(info) {
             console.log('next_game: ' + info.modetitle);
+            document.getElementById('status').innerHTML = 'next';
             var seqLists = document.getElementById('seqList').children;
             info_seq = info.seq;
             info_members = info.members;

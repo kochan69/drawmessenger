@@ -26,12 +26,12 @@ window.addEventListener('load', () => {
     }
     function dragStart(event) {
       context.beginPath();
-      $(document).on('touchmove.scroll', function(event) {event.preventDefault();});
+      //$(document).on('touchmove.scroll', function(event) {event.preventDefault();});
       isDrag = true;
     }
     function dragEnd(event) {
       context.closePath();
-      $(document).off('touchmove.scroll');
+      //$(document).off('touchmove.scroll');
       isDrag = false;
       lastPosition.x = null;
       lastPosition.y = null;
@@ -42,14 +42,19 @@ window.addEventListener('load', () => {
       canvas.addEventListener('mousedown', dragStart);
       canvas.addEventListener('mouseup', dragEnd);
       canvas.addEventListener('mouseout', dragEnd);
-      canvas.addEventListener('mousemove', (event) => {
-        draw(event.layerX, event.layerY);
+      canvas.addEventListener('mousemove', (e) => {
+        draw(e.layerX, e.layerY);
       });
       canvas.addEventListener('touchstart', dragStart);
       canvas.addEventListener('touchend', dragEnd);
-      canvas.addEventListener('touchmove', (event) => {
-        draw(event.layerX, event.layerY);
+      canvas.addEventListener('touchmove', (e) => {
+        if (e.layerX === undefined) {
+          draw(e.touches[0].pageX - canvas.offsetLeft, e.touches[0].pageY - canvas.offsetTop);
+        } else{
+          draw(e.layerX, e.layerY);
+        }
       });
+      //canvas.addEventListener('touchmove.scroll', function(e) {e.preventDefault();}, { passive: false});
     }
     initEventHandler();
   });

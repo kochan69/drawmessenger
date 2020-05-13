@@ -120,10 +120,10 @@ var server = http.createServer(function(req, res) {
                     // db
                     var query = '';
                     if (pw != '') {
-                        var query = 'insert into room values("' + idfix + '", "' + pw + '", 0, "", "")';
+                        var query = 'insert into room values("' + idfix + '", "' + pw + '", 0, "", "", "{}", "{}")';
                     }
                     else{
-                        var query = 'insert into room values("' + idfix + '", "", 0, "", "")';
+                        var query = 'insert into room values("' + idfix + '", "", 0, "", "", "{}", "{}")';
                     }
 
                     connection.query(query, function(err) {
@@ -326,12 +326,20 @@ function getIpAddress(request) {
 
 //var io = require('socket.io').listen(server);
 var io = require('socket.io')(server, {
-    maxHttpBufferSize: 100000
+    maxHttpBufferSize: 100000,
+    pingInterval: 5000
 })
 
 io.on('connection', function(socket) {
     // 接続
     socketLog.info('Connected:' + socket.handshake.address + " " + socket.handshake.url);
+
+    socket.on('checkStatus', function(info) {
+        // status
+        socket.join(info.id);
+        socketLog.info('checkStatus:' + socket.handshake.address + " " + socket.handshake.url + " roomid:" + info.id + " status:" + info.status);
+        checkStatus(info, socket.id);
+    });
 
     socket.on('join', function(info) {
         // ルーム参加
@@ -392,6 +400,7 @@ io.on('connection', function(socket) {
 
         if (info.members.length >= info.seq) {
             emit_next_game(info);
+            updateNextInfo(info);
         }
     });
 
@@ -402,7 +411,7 @@ io.on('connection', function(socket) {
         emit_result(info);        
     });
 
-    socket.on('discconect', function() {
+    socket.on('disconnect', function() {
         socketLog.info('Disconnected:' + socket.handshake.address + " " + socket.handshake.url);
     });
 
@@ -421,6 +430,7 @@ async function start_game(id, mode, members) {
     }
 
     emit_all_start_game(id, members);
+    updateStartInfo(members);
 
     info = {
         'id': id,
@@ -476,6 +486,43 @@ function selectTitle() {
     })
 };
 
+function selectStatusSeqName(info) {
+
+    return new Promise((resolve, reject) => {
+        var query = '';
+        if (info.status === 'bcast') {
+            query = 'select start_info, next_info from room where id = "' + info.id + '"';
+        } else if (info.status === 'start') {
+            query = 'select next_info from room where id = "' + info.id + '"';
+        } else if (info.status === 'next') {
+            query = 'select next_info from room where id = "' + info.id + '"';
+        }
+
+        connection.query(query, function(err, rows) {
+            if(err) {
+                serverLog.warn(err.stack);
+                reject(0);
+            }
+            else if(rows.length <= 0) {
+                serverLog.warn('not found.');
+                resolve(0);
+            }
+            else
+            {
+                var result = [];
+                if (info.status === 'bcast') {
+                    result = [JSON.parse(rows[0].start_info)];
+                } else if (info.status === 'start') {
+                    result = [JSON.parse(rows[0].start_info), JSON.parse(rows[0].next_info)];
+                } else if (info.status === 'next') {
+                    result = [JSON.parse(rows[0].next_info)];
+                }
+                resolve(result);
+            }
+        }); 
+    })
+};
+
 function updateStatusUp(id) {
     var query = 'update room set status = "1" where id = "' + id + '"';
 
@@ -515,6 +562,34 @@ function deleteAnswer(id) {
         }
     });    
 }
+
+function updateStartInfo(members) {
+
+    var json = JSON.stringify(members);
+    
+    var query = 'update room set start_info = \'' + json + '\'';
+
+    serverLog.info(query);
+
+    connection.query(query, function(err) {
+        if(err) {
+            serverLog.warn(err.stack);
+        }
+    });    
+};
+
+function updateNextInfo(info) {
+
+    var json = JSON.stringify(info);
+    
+    var query = 'update room set next_info = \'' + json + '\'';
+
+    connection.query(query, function(err) {
+        if(err) {
+            serverLog.warn(err.stack);
+        }
+    });    
+};
 
 function insertImage(id, seq, name, image) {
     
@@ -654,6 +729,24 @@ async function answer(id, name, pos, res) {
         res.write(dataFix10);
         res.end();
     });
+}
+
+async function checkStatus(info, socketid) {
+    if (info.status != '') {
+        var result = await selectStatusSeqName(info);
+        serverLog.info('checkStatusResult:' + result);
+
+        if (info.status === 'bcast') {
+            io.sockets.to(socketid).emit('start_game', result[0]);
+        } else if (info.status === 'start') {
+            io.sockets.to(socketid).emit('start_game', result[0]);
+            io.sockets.to(socketid).emit('next_game', result[1]);
+        } else if (info.status === 'next') {
+            io.sockets.to(socketid).emit('next_game', result[0]);
+        }
+    } else {
+        
+    }
 }
 
 server.listen(80);
